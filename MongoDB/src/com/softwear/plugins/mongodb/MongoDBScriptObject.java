@@ -45,7 +45,10 @@ import com.servoy.j2db.scripting.IScriptObject;
 //import com.servoy.j2db.util.Utils;
 import com.softwear.plugins.mongodb.MongoDBProvider;
 import com.softwear.servoy.MongoDBAbstractProvider;
-import java.util.regex.*;
+
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.regex.Pattern;
 
 /**
  * @author Bobby Drake
@@ -58,7 +61,7 @@ public class MongoDBScriptObject implements IScriptObject {
 	public Mongo m = null;
 	public BasicDBObject dbObj = null;
 	public BasicBSONObject bsonObj = null;
-	private static final String VERSION = "1.2.1";
+	private static final String VERSION = "1.3";
 	private MongoDBAbstractProvider provider;
 //	private FunctionDefinition processFunction;
 	
@@ -113,11 +116,36 @@ public class MongoDBScriptObject implements IScriptObject {
 		ObjectId oid = new ObjectId(id);
 		return oid;
 	}
-	/** @deprecated */
-	public BasicDBObject js_getQueryObject(String _pattern) {
-//		Pattern pt = new Pattern(_pattern);
-//		
-//		dbObj.put("$regex", /^/)
+	
+	public BasicDBObject js_getRegExQueryObject(HashMap <String,String>_keyPatternArray,String _pattern) {
+		BasicDBObject dbObj = js_getRegExQueryObject(_keyPatternArray,false);
+		return dbObj;
+	}
+	
+	public BasicDBObject js_getRegExQueryObject(HashMap <String,String>_keyPatternArray,Boolean _caseSensitive) {
+		Pattern pattern;
+		BasicDBObject dbObj = new BasicDBObject();
+		if (_caseSensitive) 
+		{
+			Iterator <String>it = _keyPatternArray.keySet().iterator();
+			while(it.hasNext()) {
+				String key = it.next();
+				String val = _keyPatternArray.get(key);
+				pattern = Pattern.compile(val);
+				dbObj.put(key, pattern);
+			}
+		}
+		else
+		{
+			Iterator <String>it = _keyPatternArray.keySet().iterator();
+			while(it.hasNext()) {
+				String key = it.next();
+				String val = _keyPatternArray.get(key);
+				pattern = Pattern.compile(val, Pattern.CASE_INSENSITIVE);
+				dbObj.put(key, pattern);
+			}
+		}
+		
 		return dbObj;
 	}
 	
@@ -164,6 +192,8 @@ public class MongoDBScriptObject implements IScriptObject {
 			return new String[] { "_host" , "_port" };
 		} else if ("authMongo".equals(methodName)) {
 			return new String[] { "_db","_user","_password" };
+		} else if ("authMongo".equals(methodName)) {
+			return new String[] { "_db","_user","_password" };
 		}
 		return null;
 	}
@@ -183,6 +213,11 @@ public class MongoDBScriptObject implements IScriptObject {
 			StringBuffer buff = new StringBuffer("// ");
 			buff.append(getToolTip(methodName));
 			buff.append("\n\t//%%elementName%%.getBasicDBObject(\"a\");");
+			return buff.toString();
+		} else if ("getRegExQueryObject".equals(methodName)) {
+			StringBuffer buff = new StringBuffer("// ");
+			buff.append(getToolTip(methodName));
+			buff.append("\n\t//%%elementName%%.getRegExQueryObject(\"a\");");
 			return buff.toString();
 		} else if ("getGridFS".equals(methodName)) {
 			StringBuffer buff = new StringBuffer("// ");
@@ -205,6 +240,8 @@ public class MongoDBScriptObject implements IScriptObject {
 			return "Returns the version of the plugin";
 		} else if ("getBasicDBObject".equals(methodName)) {
 			return "Returns a DB Object used for inserting, updating, and creating a Mongo query using the .put() method. http://www.mongodb.org/display/DOCS/Querying";
+		} else if ("getRegExQueryObject".equals(methodName)) {
+			return "Returns a special DB Object used for queries using Java regex patterns http://www.mongodb.org/display/DOCS/Querying";
 		} else if ("getGridFS".equals(methodName)) {
 			return "Returns a GridFS Object used for inserting large files into MongoDB. http://www.mongodb.org/display/DOCS/GridFS";
 		} else if ("authMongo".equals(methodName)) {
