@@ -241,7 +241,7 @@ public class MongoDBScriptObject implements IScriptObject {
 		} else if ("getBasicDBObject".equals(methodName)) {
 			return "Returns a DB Object used for inserting, updating, and creating a Mongo query using the .put() method. http://www.mongodb.org/display/DOCS/Querying";
 		} else if ("getRegExQueryObject".equals(methodName)) {
-			return "Returns a special DB Object used for queries using Java regex patterns http://www.mongodb.org/display/DOCS/Querying";
+			return "Returns a special DB Object used for queries using Java regex patterns. Provide function a string Hash Map with a key corresponding to a string representation of the regex expression. http://www.mongodb.org/display/DOCS/Querying";
 		} else if ("getGridFS".equals(methodName)) {
 			return "Returns a GridFS Object used for inserting large files into MongoDB. http://www.mongodb.org/display/DOCS/GridFS";
 		} else if ("authMongo".equals(methodName)) {
