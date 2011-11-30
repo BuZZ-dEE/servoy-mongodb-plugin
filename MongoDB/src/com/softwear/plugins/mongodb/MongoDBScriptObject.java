@@ -32,6 +32,7 @@ import com.mongodb.gridfs.*;
 //import org.mozilla.javascript.Scriptable;
 
 import com.mongodb.BasicDBObject;
+import com.mongodb.BasicDBObjectBuilder;
 import com.mongodb.DB;
 import com.mongodb.Mongo;
 import com.mongodb.MongoException;
@@ -49,6 +50,7 @@ import com.softwear.servoy.MongoDBAbstractProvider;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.regex.Pattern;
+import java.util.Map;
 
 /**
  * @author Bobby Drake
@@ -61,7 +63,7 @@ public class MongoDBScriptObject implements IScriptObject {
 	public Mongo m = null;
 	public BasicDBObject dbObj = null;
 	public BasicBSONObject bsonObj = null;
-	private static final String VERSION = "1.3";
+	private static final String VERSION = "1.4";
 	private MongoDBAbstractProvider provider;
 //	private FunctionDefinition processFunction;
 	
@@ -91,20 +93,32 @@ public class MongoDBScriptObject implements IScriptObject {
 		try {
 			return new BasicDBObject();
 		} catch (MongoException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			return null;
 		}
-		return dbObj;
+	}
+	
+	public BasicDBObject js_getBasicDBObject(String _key,String _value) throws UnknownHostException {
+		try {
+			return new BasicDBObject(_key,_value);
+		} catch (MongoException e) {
+			return null;
+		}
+	}
+	
+	public BasicDBObjectBuilder js_getBasicDBObjectBuilder() throws UnknownHostException {
+		try {
+			return new BasicDBObjectBuilder();
+		} catch (MongoException e) {
+			return null;
+		}
 	}
 	
 	public BasicBSONObject js_getBasicBSONObject() throws UnknownHostException {
 		try {
 			return new BasicBSONObject();
 		} catch (MongoException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			return null;
 		}
-		return bsonObj;
 	}
 	
 	public GridFS js_getGridFS(DB db) {
@@ -214,6 +228,11 @@ public class MongoDBScriptObject implements IScriptObject {
 			buff.append(getToolTip(methodName));
 			buff.append("\n\t//%%elementName%%.getBasicDBObject(\"a\");");
 			return buff.toString();
+		} else if ("getBasicDBObjectBuilder".equals(methodName)) {
+			StringBuffer buff = new StringBuffer("// ");
+			buff.append(getToolTip(methodName));
+			buff.append("\n\t//%%elementName%%.getBasicDBObjectBuilder(\"a\");");
+			return buff.toString();
 		} else if ("getRegExQueryObject".equals(methodName)) {
 			StringBuffer buff = new StringBuffer("// ");
 			buff.append(getToolTip(methodName));
@@ -240,6 +259,8 @@ public class MongoDBScriptObject implements IScriptObject {
 			return "Returns the version of the plugin";
 		} else if ("getBasicDBObject".equals(methodName)) {
 			return "Returns a DB Object used for inserting, updating, and creating a Mongo query using the .put() method. http://www.mongodb.org/display/DOCS/Querying";
+		} else if ("getBasicDBObjectBuilder".equals(methodName)) {
+			return "Returns a DB Object Constructor used for creating DB Objects. See API Docs http://api.mongodb.org/java/2.0/com/mongodb/BasicDBObjectBuilder.html";
 		} else if ("getRegExQueryObject".equals(methodName)) {
 			return "Returns a special DB Object used for queries using Java regex patterns. Provide function a string Hash Map with a key corresponding to a string representation of the regex expression. http://www.mongodb.org/display/DOCS/Querying";
 		} else if ("getGridFS".equals(methodName)) {
